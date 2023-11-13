@@ -28,11 +28,6 @@ int main(){
         std::cerr << "Failed to set socket option SO_RCVTIMEO" << std::endl;
         exit(EXIT_FAILURE);
     }
-    // int enable = 1;
-    // if( setsockopt(sock, SOL_SOCKET, SO_BROADCAST, &enable, sizeof enable) < 0 ) {
-    //     std::cerr << "Failed to set socket option SO_BROADCAST" << std::endl;
-    //     exit(EXIT_FAILURE);
-    // }
 
     self_addr->sin_family = AF_INET;
     self_addr->sin_addr.s_addr = INADDR_ANY;
@@ -44,8 +39,8 @@ int main(){
     }
 
     remote_addr->sin_family = AF_INET;
-    remote_addr->sin_addr.s_addr = inet_addr("172.16.40.1");
-    remote_addr->sin_port = htons(0);
+    remote_addr->sin_addr.s_addr = inet_addr("127.0.0.1");
+    remote_addr->sin_port = htons(44214);
 
     char buf[256];
 
@@ -56,19 +51,15 @@ int main(){
 
     socklen_t clen = sizeof(sockaddr);
 
-    while( true ) {
-        sr_code = recvfrom(sock, buf, 1024, 0, reinterpret_cast< sockaddr* >(remote_addr.get()), &clen);
-        if( sr_code == -1 ) {
-            if( errno == EAGAIN )
-                break;
-            std::cerr << "Failed to recieve message" << std::endl;
-            exit(EXIT_FAILURE);
-        }
-
-        buf[sr_code] = '\0';
-
-        std::cout << buf << std::endl;
+    sr_code = recvfrom(sock, buf, 256, 0, reinterpret_cast< sockaddr* >(remote_addr.get()), &clen);
+    if( sr_code == -1 ) {
+        std::cerr << "Failed to recieve message" << std::endl;
+        exit(EXIT_FAILURE);
     }
 
+    std::string daytime(buf, sr_code);
+
+    std::cout << daytime << std::endl;
+    
     return 0;
 }
